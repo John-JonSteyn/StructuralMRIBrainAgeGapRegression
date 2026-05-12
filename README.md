@@ -23,31 +23,6 @@ The repository contains the reproducible research workflow used to prepare data,
 
 ---
 
-## Methodology
-
-1. **Data preparation**  
-   Identifying, organising, and documenting the required ADNI imaging and tabular metadata files.
-
-2. **MRI processing**  
-   Processing T1-weighted MRI scans to obtain structural neuroimaging features suitable for statistical modelling and machine-learning analysis.
-
-3. **Feature integration**  
-   Linking MRI-derived features with chronological age, diagnosis, cognitive scores, and relevant participant-level covariates.
-
-4. **Brain-age modelling**  
-   Training regression models to predict chronological age from MRI-derived structural features.
-
-5. **Brain-age gap estimation**  
-   Calculating the difference between predicted brain age and chronological age for held-out participants.
-
-6. **Statistical analysis**  
-   Analysing associations between brain-age gap, cognitive performance, and Alzheimer’s disease diagnostic status.
-
-7. **Reporting**  
-   Summarising the modelling results, statistical findings, limitations, and reproducibility considerations.
-
----
-
 ## Research Focus
 
 Brain-age modelling provides a way to convert high-dimensional structural MRI information into an interpretable ageing-related marker. In this study, brain-age prediction is used as an intermediate modelling step to derive brain-age gap, which is then analysed in relation to cognitive and diagnostic outcomes.
@@ -60,9 +35,52 @@ The central research question is:
 
 ## Data
 
-This study is designed for use with data from the Alzheimer’s Disease Neuroimaging Initiative (ADNI).
+This study uses data from the Alzheimer’s Disease Neuroimaging Initiative (ADNI). ADNI data are not included in this repository. Access requires approval through the LONI Image & Data Archive and compliance with the applicable ADNI data-use agreements.
 
-ADNI provides longitudinal neuroimaging, clinical, cognitive, genetic, and biomarker data for Alzheimer’s disease research. Access is managed through the official ADNI data access process and is subject to the applicable data-use agreements.
+The data-acquisition procedure, selected ADNI tables, MRI search filters, collection names, and local folder layout are documented in [`Data/README.md`](Data/README.md).
+
+After downloading the required ADNI archives, place them directly in `Data/` and run:
+
+```powershell
+python Source\Utilities\UnpackRawData.py
+```
+
+The first-pass dataset is designed around baseline or screening 3T T1-weighted structural MRI from ADNI 1, ADNI GO, ADNI 2, and ADNI 3, linked to diagnosis, demographics, cognitive assessments, MRI metadata, and MRI quality-control tables.
+
+The raw and derived ADNI data directories are excluded from version control.
+
+---
+
+## Software Requirements
+
+The raw-data unpacking utility requires **Python 3.10 or later**.
+
+The current raw-data unpacking step uses only the Python standard library. The repository includes a `requirements.txt` file for Python package dependencies added by later analysis stages.
+
+---
+
+## Methodology
+
+1. **Data preparation**
+   Identifying, organising, and documenting the required ADNI imaging and tabular metadata files.
+
+2. **MRI processing**
+   Processing T1-weighted MRI scans to obtain structural neuroimaging features suitable for statistical modelling and machine-learning analysis.
+
+3. **Feature integration**
+   Linking MRI-derived features with chronological age, diagnosis, cognitive scores, and relevant participant-level covariates.
+
+4. **Brain-age modelling**
+   Training regression models to predict chronological age from MRI-derived structural features.
+
+5. **Brain-age gap estimation**
+   Calculating the difference between predicted brain age and chronological age for held-out participants.
+
+6. **Statistical analysis**
+   Analysing associations between brain-age gap, cognitive performance, and Alzheimer’s disease diagnostic status.
+
+7. **Reporting**
+   Summarising the modelling results, statistical findings, limitations, and reproducibility considerations.
 
 ---
 
@@ -76,6 +94,9 @@ The study prioritises:
 * Explicit recording of model inputs, covariates, and evaluation metrics.
 * Version-controlled analysis code.
 * Transparent reporting of statistical models, assumptions, and evaluation criteria.
+
+---
+
 ## Purpose
 
 This study investigates whether structural MRI-derived brain-age gap is associated with cognitive decline and Alzheimer’s disease diagnosis.

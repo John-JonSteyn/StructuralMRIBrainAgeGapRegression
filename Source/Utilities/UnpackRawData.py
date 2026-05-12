@@ -1,3 +1,9 @@
+"""Unpack downloaded ADNI archives into the local Data/Raw layout.
+
+Place ADNI zip files directly in Data/. The script creates folders, extracts
+archives, and deletes each zip after successful extraction unless --keep-archives is used.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -12,6 +18,7 @@ def EnsureDirectory(DirectoryPath: Path) -> None:
 
 
 def CreateExpectedDirectoryStructure(DataRootDirectory: Path) -> None:
+    """Create the expected raw clinical and imaging directory structure."""
     ExpectedDirectories = [
         DataRootDirectory / "Raw" / "Clinical",
         DataRootDirectory / "Raw" / "Clinical" / "StudyData",
@@ -26,6 +33,7 @@ def CreateExpectedDirectoryStructure(DataRootDirectory: Path) -> None:
 
 
 def MoveArchiveFile(SourceFilePath: Path, DestinationFilePath: Path) -> Path:
+    """Move an archive into its target raw-data location, replacing an older archive if present."""
     EnsureDirectory(DestinationFilePath.parent)
 
     if not SourceFilePath.exists():
@@ -48,6 +56,7 @@ def MoveArchiveFile(SourceFilePath: Path, DestinationFilePath: Path) -> Path:
 
 
 def ValidateZipMemberPath(ZipMemberName: str) -> None:
+    """Reject unsafe paths inside zip archives before extraction."""
     ZipMemberPath = Path(ZipMemberName)
 
     if ZipMemberPath.is_absolute() or ".." in ZipMemberPath.parts:
@@ -55,6 +64,7 @@ def ValidateZipMemberPath(ZipMemberName: str) -> None:
 
 
 def ValidateTarMemberPath(TarMemberName: str) -> None:
+    """Reject unsafe paths inside tar archives before extraction."""
     TarMemberPath = Path(TarMemberName)
 
     if TarMemberPath.is_absolute() or ".." in TarMemberPath.parts:
@@ -62,6 +72,7 @@ def ValidateTarMemberPath(TarMemberName: str) -> None:
 
 
 def ExtractZipFile(ZipFilePath: Path, DestinationDirectory: Path, DeleteAfterExtraction: bool) -> None:
+    """Extract a zip archive and optionally delete it after successful extraction."""
     EnsureDirectory(DestinationDirectory)
 
     print(f"Extracting ZIP: {ZipFilePath}")
@@ -78,6 +89,7 @@ def ExtractZipFile(ZipFilePath: Path, DestinationDirectory: Path, DeleteAfterExt
 
 
 def ExtractTarGzFile(TarGzFilePath: Path, DestinationDirectory: Path, DeleteAfterExtraction: bool) -> None:
+    """Extract a tar.gz archive and optionally delete it after successful extraction."""
     EnsureDirectory(DestinationDirectory)
 
     print(f"Extracting TAR.GZ: {TarGzFilePath}")
@@ -94,6 +106,7 @@ def ExtractTarGzFile(TarGzFilePath: Path, DestinationDirectory: Path, DeleteAfte
 
 
 def RemoveDuplicatePaths(FilePaths: list[Path]) -> list[Path]:
+    """Return paths with duplicates removed after resolving absolute paths."""
     SeenResolvedPaths: set[Path] = set()
     UniqueFilePaths: list[Path] = []
 
@@ -110,6 +123,7 @@ def RemoveDuplicatePaths(FilePaths: list[Path]) -> list[Path]:
 
 
 def FindClinicalDownloadZip(DataRootDirectory: Path) -> Path | None:
+    """Find the ADNI clinical study-data zip in Data/ or its raw destination."""
     CandidatePaths = [
         DataRootDirectory / "download.zip",
         DataRootDirectory / "ADNI_StudyData.zip",
@@ -124,6 +138,7 @@ def FindClinicalDownloadZip(DataRootDirectory: Path) -> Path | None:
 
 
 def FindImagingMetadataZipFiles(DataRootDirectory: Path) -> list[Path]:
+    """Find IDA metadata zip files in Data/ or the imaging manifest folder."""
     CandidateDirectories = [
         DataRootDirectory,
         DataRootDirectory / "Raw" / "Imaging" / "Baseline3T1MPRAGE" / "Manifest",
@@ -143,6 +158,7 @@ def FindImagingMetadataZipFiles(DataRootDirectory: Path) -> list[Path]:
 
 
 def FindImagingArchiveZipFiles(DataRootDirectory: Path) -> list[Path]:
+    """Find MRI image archive zips in Data/ or the imaging archives folder."""
     CandidateDirectories = [
         DataRootDirectory,
         DataRootDirectory / "Raw" / "Imaging" / "Baseline3T1MPRAGE" / "Archives",
@@ -162,6 +178,7 @@ def FindImagingArchiveZipFiles(DataRootDirectory: Path) -> list[Path]:
 
 
 def PrepareClinicalRawData(DataRootDirectory: Path, DeleteArchives: bool) -> None:
+    """Move and extract the ADNI clinical archive and nested clinical archives."""
     ClinicalRootDirectory = DataRootDirectory / "Raw" / "Clinical"
     StudyDataDirectory = ClinicalRootDirectory / "StudyData"
 
@@ -207,6 +224,7 @@ def PrepareClinicalRawData(DataRootDirectory: Path, DeleteArchives: bool) -> Non
 
 
 def PrepareImagingRawData(DataRootDirectory: Path, DeleteArchives: bool) -> None:
+    """Move and extract IDA metadata and MRI image archives."""
     ImagingRootDirectory = DataRootDirectory / "Raw" / "Imaging" / "Baseline3T1MPRAGE"
     ManifestDirectory = ImagingRootDirectory / "Manifest"
     ArchivesDirectory = ImagingRootDirectory / "Archives"
@@ -260,6 +278,7 @@ def CountFiles(DirectoryPath: Path) -> int:
 
 
 def CountNiftiFiles(DirectoryPath: Path) -> int:
+    """Count extracted NIfTI files, including .nii and .nii.gz files."""
     if not DirectoryPath.exists():
         return 0
 
@@ -276,6 +295,7 @@ def CountNiftiFiles(DirectoryPath: Path) -> int:
 
 
 def CountPreparedFiles(DataRootDirectory: Path) -> None:
+    """Print a short summary of unpacked clinical, manifest, archive, and image files."""
     ClinicalStudyDataDirectory = DataRootDirectory / "Raw" / "Clinical" / "StudyData"
     ImagingManifestDirectory = DataRootDirectory / "Raw" / "Imaging" / "Baseline3T1MPRAGE" / "Manifest"
     ImagingArchivesDirectory = DataRootDirectory / "Raw" / "Imaging" / "Baseline3T1MPRAGE" / "Archives"
@@ -298,6 +318,7 @@ def CountPreparedFiles(DataRootDirectory: Path) -> None:
 
 
 def ParseArguments() -> argparse.Namespace:
+    """Parse command-line arguments for unpacking raw data."""
     ArgumentParser = argparse.ArgumentParser(
         description="Unpack locally downloaded ADNI archives into the expected Data/Raw layout."
     )

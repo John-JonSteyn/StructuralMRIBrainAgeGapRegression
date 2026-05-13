@@ -1,2 +1,4 @@
 Data/Interim/*
+Data/Processed/*
 Data/Raw/*
+LocalOnly/FreeSurfer/license.txt

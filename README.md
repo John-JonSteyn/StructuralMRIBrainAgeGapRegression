@@ -53,9 +53,13 @@ The raw and derived ADNI data directories are excluded from version control.
 
 ## Software Requirements
 
-The raw-data unpacking utility requires **Python 3.10 or later**.
+The data-preparation scripts require **Python 3.10** or later.
 
-The current raw-data unpacking step uses only the Python standard library. The repository includes a `requirements.txt` file for Python package dependencies added by later analysis stages.
+MRI feature extraction requires **Docker**. FastSurfer is run through the official Docker image rather than installed directly into this repository.
+
+*On Windows, Docker Desktop should be installed with the WSL2 backend enabled. On Linux and macOS, use a working Docker installation suitable for the host system.*
+
+FastSurfer also requires a local FreeSurfer licence file for the full surface-processing pipeline. The licence file should be stored locally and should not be committed to version control.
 
 ---
 

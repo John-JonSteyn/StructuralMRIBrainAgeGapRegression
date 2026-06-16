@@ -47,6 +47,18 @@ def EnsureDirectory(DirectoryPath: Path) -> None:
     DirectoryPath.mkdir(parents=True, exist_ok=True)
 
 
+def PrintProgress(Message: str) -> None:
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {Message}", flush=True)
+
+
+def FormatDuration(DurationSeconds: float) -> str:
+    RoundedSeconds = int(round(DurationSeconds))
+    Hours = RoundedSeconds // 3600
+    Minutes = (RoundedSeconds % 3600) // 60
+    Seconds = RoundedSeconds % 60
+    return f"{Hours:02d}:{Minutes:02d}:{Seconds:02d}"
+
+
 def NormaliseText(TextValue: object) -> str:
     return str(TextValue).strip() if TextValue is not None else ""
 
@@ -229,38 +241,49 @@ def WriteMarkdownSummary(OutputFilePath: Path, SummaryRows: list[dict[str, objec
 
 
 def Main() -> None:
+    StartedAt = datetime.now()
+    PrintProgress("Starting FastSurfer input manifest build.")
     EnsureDirectory(FeatureExtractionOutputDirectory)
 
     if not SelectedBaselineCohortPath.exists():
         raise FileNotFoundError(f"Selected baseline cohort file not found: {SelectedBaselineCohortPath}")
 
+    PrintProgress(f"Checking FreeSurfer licence: {LocalLicensePath}")
     LicenseFound = ValidateLicenseFile()
 
+    PrintProgress(f"Reading selected baseline cohort: {SelectedBaselineCohortPath}")
     CohortRows = ReadCsvRows(SelectedBaselineCohortPath)
+    PrintProgress(f"Selected baseline cohort rows loaded: {len(CohortRows)}")
+
+    PrintProgress("Building FastSurfer input rows.")
     FastSurferInputRows = BuildFastSurferInputRows(CohortRows)
     SummaryRows = BuildSummaryRows(
         FastSurferInputRows=FastSurferInputRows,
         LicenseFound=LicenseFound,
     )
 
+    PrintProgress(f"Writing manifest: {FastSurferInputManifestPath}")
     WriteCsv(
         OutputFilePath=FastSurferInputManifestPath,
         FieldNames=OutputFieldNames,
         DataRows=FastSurferInputRows,
     )
 
+    PrintProgress(f"Writing summary: {FastSurferInputManifestSummaryPath}")
     WriteCsv(
         OutputFilePath=FastSurferInputManifestSummaryPath,
         FieldNames=["Metric", "Value"],
         DataRows=SummaryRows,
     )
 
+    PrintProgress(f"Writing Markdown summary: {FastSurferInputManifestMarkdownSummaryPath}")
     WriteMarkdownSummary(
         OutputFilePath=FastSurferInputManifestMarkdownSummaryPath,
         SummaryRows=SummaryRows,
     )
 
-    print("FastSurfer input manifest build complete.")
+    DurationSeconds = (datetime.now() - StartedAt).total_seconds()
+    PrintProgress(f"FastSurfer input manifest build complete in {FormatDuration(DurationSeconds)}.")
     print(f"Input cohort rows: {len(CohortRows)}")
     print(f"Manifest rows: {len(FastSurferInputRows)}")
     print(f"License found: {LicenseFound}")

@@ -13,6 +13,8 @@ from pathlib import Path
 FastSurferInputManifestPath = Path("Data") / "Processed" / "FeatureExtraction" / "FastSurferInputManifest.csv"
 FastSurferOutputRootDirectory = Path("Data") / "Processed" / "FastSurfer"
 SelectedBaselineCohortPath = Path("Data") / "Interim" / "Cohort" / "SelectedBaselineCohort.csv"
+ImageClinicalLinkagePath = Path("Data") / "Interim" / "Linkage" / "ImageClinicalLinkage.csv"
+ImageManifestPath = Path("Data") / "Interim" / "Imaging" / "ImageManifest.csv"
 
 OutputDirectory = Path("Data") / "Processed" / "Analysis"
 FastSurferRegionalFeaturesPath = OutputDirectory / "FastSurferRegionalFeatures.csv"
@@ -78,10 +80,9 @@ MetadataFieldCandidates = {
     "FAQ": ["FAQ", "FAQScore"],
     "ImageStudyDate": ["ImageStudyDate", "StudyDate", "MRIStudyDate"],
     "ClinicalExamDate": ["ClinicalExamDate", "ExamDate", "VisitDate", "EXAMDATE"],
-    "QcStatus": ["QcStatus", "MRIQCStatus", "MriQcStatus"],
-    "Manufacturer": ["Manufacturer", "MriManufacturer"],
-    "ScannerModel": ["ScannerModel", "MfgModel", "Mfg Model", "ManufacturerModel", "MriScannerModel"],
-    "FieldStrength": ["FieldStrength", "Field Strength"],
+    "Manufacturer": ["Manufacturer", "MriManufacturer", "MFG", "Mfg"],
+    "ScannerModel": ["ScannerModel", "MfgModel", "Mfg Model", "ManufacturerModel", "MriScannerModel", "Model", "Scanner Model"],
+    "FieldStrength": ["FieldStrength", "Field Strength", "MAGSTRENGTH", "MagStrength", "Tesla"],
     "FastSurferSubjectId": ["FastSurferSubjectId"],
 }
 
@@ -99,7 +100,6 @@ OutputMetadataFields = [
     "FAQ",
     "ImageStudyDate",
     "ClinicalExamDate",
-    "QcStatus",
     "Manufacturer",
     "ScannerModel",
     "FieldStrength",
@@ -121,8 +121,7 @@ CoreMetadataFields = [
     "FastSurferStatus",
 ]
 
-ScannerAndQcFields = [
-    "QcStatus",
+ScannerMetadataFields = [
     "Manufacturer",
     "ScannerModel",
     "FieldStrength",
@@ -234,6 +233,12 @@ def ValidateInputs() -> None:
     if not SelectedBaselineCohortPath.exists():
         raise FileNotFoundError(f"Selected baseline cohort file not found: {SelectedBaselineCohortPath}")
 
+    if not ImageClinicalLinkagePath.exists():
+        raise FileNotFoundError(f"Image-clinical linkage file not found: {ImageClinicalLinkagePath}")
+
+    if not ImageManifestPath.exists():
+        raise FileNotFoundError(f"Image manifest file not found: {ImageManifestPath}")
+
     if not FastSurferOutputRootDirectory.exists():
         raise FileNotFoundError(f"FastSurfer output directory not found: {FastSurferOutputRootDirectory}")
 
@@ -286,17 +291,28 @@ def BuildRowsByImageId(DataRows: list[dict[str, str]]) -> dict[str, dict[str, st
 def GetMergedMetadataValue(
     CohortRow: dict[str, str],
     CohortHeaders: list[str],
+    LinkageRow: dict[str, str],
+    LinkageHeaders: list[str],
+    ImageManifestRow: dict[str, str],
+    ImageManifestHeaders: list[str],
     ManifestRow: dict[str, str],
     ManifestHeaders: list[str],
     OutputFieldName: str,
 ) -> str:
-    CohortValue = GetMetadataValue(CohortRow, CohortHeaders, OutputFieldName)
+    SourceRowsAndHeaders = [
+        (CohortRow, CohortHeaders),
+        (LinkageRow, LinkageHeaders),
+        (ImageManifestRow, ImageManifestHeaders),
+        (ManifestRow, ManifestHeaders),
+    ]
 
-    if CohortValue:
-        return CohortValue
+    for SourceRow, SourceHeaders in SourceRowsAndHeaders:
+        SourceValue = GetMetadataValue(SourceRow, SourceHeaders, OutputFieldName)
 
-    return GetMetadataValue(ManifestRow, ManifestHeaders, OutputFieldName)
+        if SourceValue:
+            return SourceValue
 
+    return ""
 
 def GetSubjectOutputDirectory(FastSurferSubjectId: str) -> Path:
     return FastSurferOutputRootDirectory / FastSurferSubjectId
@@ -585,6 +601,10 @@ def BuildMetadataRow(
     ManifestHeaders: list[str],
     CohortRow: dict[str, str],
     CohortHeaders: list[str],
+    LinkageRow: dict[str, str],
+    LinkageHeaders: list[str],
+    ImageManifestRow: dict[str, str],
+    ImageManifestHeaders: list[str],
     FastSurferStatus: str,
 ) -> dict[str, object]:
     MetadataRow: dict[str, object] = {}
@@ -598,6 +618,10 @@ def BuildMetadataRow(
             MetadataRow[OutputMetadataField] = GetMergedMetadataValue(
                 CohortRow=CohortRow,
                 CohortHeaders=CohortHeaders,
+                LinkageRow=LinkageRow,
+                LinkageHeaders=LinkageHeaders,
+                ImageManifestRow=ImageManifestRow,
+                ImageManifestHeaders=ImageManifestHeaders,
                 ManifestRow=ManifestRow,
                 ManifestHeaders=ManifestHeaders,
                 OutputFieldName=OutputMetadataField,
@@ -605,31 +629,60 @@ def BuildMetadataRow(
 
     return MetadataRow
 
-
 def BuildRegionalFeatureRows(
     ManifestRows: list[dict[str, str]],
     CohortRows: list[dict[str, str]],
+    LinkageRows: list[dict[str, str]],
+    ImageManifestRows: list[dict[str, str]],
 ) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]]]:
     ManifestHeaders = GetHeaders(ManifestRows)
     CohortHeaders = GetHeaders(CohortRows)
+    LinkageHeaders = GetHeaders(LinkageRows)
+    ImageManifestHeaders = GetHeaders(ImageManifestRows)
+
     CohortRowsByImageId = BuildRowsByImageId(CohortRows)
+    LinkageRowsByImageId = BuildRowsByImageId(LinkageRows)
+    ImageManifestRowsByImageId = BuildRowsByImageId(ImageManifestRows)
 
     RegionalFeatureRows: list[dict[str, object]] = []
     ExclusionRows: list[dict[str, object]] = []
     FeatureDictionaryRowsByName: dict[str, dict[str, object]] = {}
 
     TotalRows = len(ManifestRows)
+    MatchedCohortCount = 0
+    MatchedLinkageCount = 0
+    MatchedImageManifestCount = 0
+
     PrintProgress(f"Checking {TotalRows} FastSurfer manifest rows.")
     PrintProgress(f"Selected baseline cohort rows available for metadata join: {len(CohortRowsByImageId)}")
+    PrintProgress(f"Image-clinical linkage rows available for metadata fallback: {len(LinkageRowsByImageId)}")
+    PrintProgress(f"Image manifest rows available for metadata fallback: {len(ImageManifestRowsByImageId)}")
 
     for RowIndex, ManifestRow in enumerate(ManifestRows, start=1):
         FastSurferSubjectId = GetMetadataValue(ManifestRow, ManifestHeaders, "FastSurferSubjectId")
         ImageId = GetMetadataValue(ManifestRow, ManifestHeaders, "ImageId")
         CohortRow = CohortRowsByImageId.get(ImageId, {})
+        LinkageRow = LinkageRowsByImageId.get(ImageId, {})
+        ImageManifestRow = ImageManifestRowsByImageId.get(ImageId, {})
 
-        RID = GetMergedMetadataValue(CohortRow, CohortHeaders, ManifestRow, ManifestHeaders, "RID")
-        SubjectId = GetMergedMetadataValue(CohortRow, CohortHeaders, ManifestRow, ManifestHeaders, "SubjectId")
-        Diagnosis3Class = GetMergedMetadataValue(CohortRow, CohortHeaders, ManifestRow, ManifestHeaders, "Diagnosis3Class")
+        if CohortRow:
+            MatchedCohortCount += 1
+
+        if LinkageRow:
+            MatchedLinkageCount += 1
+
+        if ImageManifestRow:
+            MatchedImageManifestCount += 1
+
+        RID = GetMergedMetadataValue(
+            CohortRow, CohortHeaders, LinkageRow, LinkageHeaders, ImageManifestRow, ImageManifestHeaders, ManifestRow, ManifestHeaders, "RID"
+        )
+        SubjectId = GetMergedMetadataValue(
+            CohortRow, CohortHeaders, LinkageRow, LinkageHeaders, ImageManifestRow, ImageManifestHeaders, ManifestRow, ManifestHeaders, "SubjectId"
+        )
+        Diagnosis3Class = GetMergedMetadataValue(
+            CohortRow, CohortHeaders, LinkageRow, LinkageHeaders, ImageManifestRow, ImageManifestHeaders, ManifestRow, ManifestHeaders, "Diagnosis3Class"
+        )
 
         FastSurferStatus = GetFastSurferStatus(FastSurferSubjectId)
         MissingRequiredStatsFiles = GetMissingRequiredStatsFiles(FastSurferSubjectId)
@@ -638,9 +691,12 @@ def BuildRegionalFeatureRows(
 
         if ShouldPrintThisRow:
             CohortJoinStatus = "MatchedCohort" if CohortRow else "MissingCohort"
+            LinkageJoinStatus = "MatchedLinkage" if LinkageRow else "MissingLinkage"
+            ImageManifestJoinStatus = "MatchedImageManifest" if ImageManifestRow else "MissingImageManifest"
             PrintProgress(
                 f"Row {RowIndex}/{TotalRows}: RID {RID}, Image {ImageId}, "
-                f"{Diagnosis3Class}, FastSurferStatus={FastSurferStatus}, {CohortJoinStatus}"
+                f"{Diagnosis3Class}, FastSurferStatus={FastSurferStatus}, "
+                f"{CohortJoinStatus}, {LinkageJoinStatus}, {ImageManifestJoinStatus}"
             )
 
         if FastSurferStatus != "Complete":
@@ -669,6 +725,10 @@ def BuildRegionalFeatureRows(
             ManifestHeaders=ManifestHeaders,
             CohortRow=CohortRow,
             CohortHeaders=CohortHeaders,
+            LinkageRow=LinkageRow,
+            LinkageHeaders=LinkageHeaders,
+            ImageManifestRow=ImageManifestRow,
+            ImageManifestHeaders=ImageManifestHeaders,
             FastSurferStatus=FastSurferStatus,
         )
 
@@ -689,6 +749,9 @@ def BuildRegionalFeatureRows(
 
     PrintProgress(f"Finished parsing complete FastSurfer subjects: {len(RegionalFeatureRows)} included.")
     PrintProgress(f"Excluded incomplete FastSurfer subjects: {len(ExclusionRows)}.")
+    PrintProgress(f"Manifest rows matched to selected cohort metadata: {MatchedCohortCount}/{TotalRows}.")
+    PrintProgress(f"Manifest rows matched to image-clinical linkage metadata: {MatchedLinkageCount}/{TotalRows}.")
+    PrintProgress(f"Manifest rows matched to image manifest metadata: {MatchedImageManifestCount}/{TotalRows}.")
 
     FeatureDictionaryRows = [
         FeatureDictionaryRowsByName[FeatureName]
@@ -900,17 +963,17 @@ def BuildProblemColumnRows(
                 }
             )
 
-    for ScannerAndQcField in ScannerAndQcFields:
-        CoverageRow = MetadataCoverageByField.get(ScannerAndQcField, {})
+    for ScannerMetadataField in ScannerMetadataFields:
+        CoverageRow = MetadataCoverageByField.get(ScannerMetadataField, {})
         RowsWithValue = int(CoverageRow.get("RowsWithValue", 0))
 
         if RowsWithValue == 0:
             ProblemRows.append(
                 {
-                    "ColumnName": ScannerAndQcField,
+                    "ColumnName": ScannerMetadataField,
                     "ColumnType": "Metadata",
-                    "ProblemType": "MissingScannerOrQcMetadata",
-                    "Details": "Scanner/QC field is fully empty. Do not claim this covariate or QC status is available.",
+                    "ProblemType": "MissingScannerMetadata",
+                    "Details": "Scanner metadata field is fully empty. Do not claim this scanner covariate is available.",
                 }
             )
 
@@ -980,9 +1043,9 @@ def BuildSummaryRows(
         for CoreMetadataField in CoreMetadataFields
     )
 
-    ScannerAndQcMetadataReady = all(
+    ScannerMetadataReady = all(
         int(MetadataCoverageByField.get(FieldName, {}).get("RowsWithValue", 0)) > 0
-        for FieldName in ScannerAndQcFields
+        for FieldName in ScannerMetadataFields
     )
 
     CoreFeatureTableReadyForModelling = (
@@ -1021,13 +1084,13 @@ def BuildSummaryRows(
         {"Metric": "ProblemColumnRows", "Value": len(ProblemRows)},
         {"Metric": "CoreMetadataReady", "Value": CoreMetadataReady},
         {"Metric": "CoreFeatureTableReadyForModelling", "Value": CoreFeatureTableReadyForModelling},
-        {"Metric": "ScannerAndQcMetadataReady", "Value": ScannerAndQcMetadataReady},
+        {"Metric": "ScannerMetadataReady", "Value": ScannerMetadataReady},
         {"Metric": "FeatureTablePath", "Value": str(FastSurferRegionalFeaturesPath)},
         {"Metric": "FeatureDictionaryPath", "Value": str(FastSurferFeatureDictionaryPath)},
         {"Metric": "ExclusionsPath", "Value": str(FastSurferRegionalFeatureExclusionsPath)},
     ]
 
-    for FieldName in DateFields + CognitiveFields + ScannerAndQcFields:
+    for FieldName in DateFields + CognitiveFields + ScannerMetadataFields:
         SummaryRows.append(
             {
                 "Metric": f"RowsWith{FieldName}",
@@ -1096,9 +1159,19 @@ def Main() -> None:
     CohortRows = ReadCsvRows(SelectedBaselineCohortPath)
     PrintProgress(f"Selected baseline cohort rows loaded: {len(CohortRows)}")
 
+    PrintProgress(f"Reading image-clinical linkage metadata: {ImageClinicalLinkagePath}")
+    LinkageRows = ReadCsvRows(ImageClinicalLinkagePath)
+    PrintProgress(f"Image-clinical linkage rows loaded: {len(LinkageRows)}")
+
+    PrintProgress(f"Reading image manifest metadata: {ImageManifestPath}")
+    ImageManifestRows = ReadCsvRows(ImageManifestPath)
+    PrintProgress(f"Image manifest rows loaded: {len(ImageManifestRows)}")
+
     RegionalFeatureRows, FeatureDictionaryRows, ExclusionRows = BuildRegionalFeatureRows(
         ManifestRows=ManifestRows,
         CohortRows=CohortRows,
+        LinkageRows=LinkageRows,
+        ImageManifestRows=ImageManifestRows,
     )
 
     PrintProgress("Collecting feature column names.")

@@ -41,7 +41,6 @@ RequiredOutputFields = [
     "AcquisitionPlane",
     "Manufacturer",
     "ScannerModel",
-    "QcStatus",
     "MprageRank",
     "InStandardised3TList",
     "IdaMetadataMatchCount",

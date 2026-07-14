@@ -1,34 +1,26 @@
-# Structural MRI Brain-Age Gap Regression
+# Alzheimer's Brain-Age Representation Analysis
 
-*A reproducible structural MRI workflow for testing whether regional brain-age gaps retain more Alzheimer's diagnostic and cognitive information than a single whole-brain gap.*
+*A reproducible structural MRI analysis of how scalar, regional, and raw brain-age representations differ in Alzheimer's diagnostic and cognitive utility.*
 
 <p align="center">
-  <a href="https://github.com/John-JonSteyn/StructuralMRIBrainAgeGapRegression/stargazers" target="_blank" rel="noopener noreferrer">
-    <img src="https://img.shields.io/github/stars/John-JonSteyn/StructuralMRIBrainAgeGapRegression?style=for-the-badge&color=526D82" alt="GitHub stars" />
-  </a>
-  <a href="https://github.com/John-JonSteyn/StructuralMRIBrainAgeGapRegression" target="_blank" rel="noopener noreferrer">
-    <img src="https://img.shields.io/github/repo-size/John-JonSteyn/StructuralMRIBrainAgeGapRegression?style=for-the-badge&color=526D82" alt="Repository size" />
-  </a>
-  <a href="https://github.com/John-JonSteyn/StructuralMRIBrainAgeGapRegression/commits/main" target="_blank" rel="noopener noreferrer">
-    <img src="https://img.shields.io/github/last-commit/John-JonSteyn/StructuralMRIBrainAgeGapRegression?style=for-the-badge&color=526D82" alt="Last commit" />
-  </a>
-  <a href="https://github.com/John-JonSteyn/StructuralMRIBrainAgeGapRegression/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">
-    <img src="https://img.shields.io/github/license/John-JonSteyn/StructuralMRIBrainAgeGapRegression?style=for-the-badge&color=526D82" alt="Licence" />
-  </a>
+  <a href="https://github.com/John-JonSteyn/AlzheimersBrainAgeRepresentationAnalysis/stargazers" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/github/stars/John-JonSteyn/AlzheimersBrainAgeRepresentationAnalysis?style=for-the-badge&color=9467BD" alt="GitHub stars" /></a>
+  <a href="https://github.com/John-JonSteyn/AlzheimersBrainAgeRepresentationAnalysis" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/github/repo-size/John-JonSteyn/AlzheimersBrainAgeRepresentationAnalysis?style=for-the-badge&color=9467BD" alt="Repository size" /></a>
+  <a href="https://github.com/John-JonSteyn/AlzheimersBrainAgeRepresentationAnalysis/commits/main" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/github/last-commit/John-JonSteyn/AlzheimersBrainAgeRepresentationAnalysis?style=for-the-badge&color=9467BD" alt="Last commit" /></a>
+  <a href="https://github.com/John-JonSteyn/AlzheimersBrainAgeRepresentationAnalysis/blob/main/LICENSE" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/github/license/John-JonSteyn/AlzheimersBrainAgeRepresentationAnalysis?style=for-the-badge&color=9467BD" alt="Licence" /></a>
 </p>
 
 ---
 
 ## Overview
 
-This repository provides the executable analysis for *Regional Brain-Age Gaps Improve Alzheimer's Diagnostic and Cognitive Utility* by Zeeshan Mehmood and John-Jon Steyn.
+This repository contains the reproducible analysis for *Regional Brain-Age Gaps Improve Alzheimer's Diagnostic and Cognitive Utility* by Zeeshan Mehmood and John-Jon Steyn.
 
-The study links baseline 3 T T1-weighted MPRAGE scans from the Alzheimer's Disease Neuroimaging Initiative (ADNI) to demographic, diagnostic, and cognitive data. FastSurfer v2.4.2 produces regional morphometric measurements. Brain-age models learn chronological age exclusively from cognitively normal (CN) participants.
+The study uses baseline 3 T T1-weighted MPRAGE scans from the Alzheimer's Disease Neuroimaging Initiative (ADNI). FastSurfer v2.4.2 supplies regional morphometric measurements, and cognitively normal (CN) participants define the reference trajectory for chronological brain ageing.
 
-Each participant is represented by:
+Three representations are evaluated within the same subject-level out-of-fold framework:
 
-* one scalar whole-brain brain-age gap;
-* a vector of 171 regional brain-age gaps; or
+* a scalar whole-brain brain-age gap;
+* a vector of 171 regional brain-age gaps; and
 * 1,379 raw FastSurfer anatomical predictors.
 
 Brain-age gap is defined as:
@@ -37,36 +29,36 @@ Brain-age gap is defined as:
 predicted brain age - chronological age
 ```
 
-A positive value indicates older-appearing brain structure. All downstream estimates are subject-level out-of-fold predictions. Scaling, regularisation selection, brain-age estimation, bias correction, diagnostic modelling, and cognition modelling are fitted within the relevant training folds.
+Positive values indicate older-appearing brain structure relative to chronological age. The analysis asks how much diagnostic and cognitive information is retained as structural MRI is compressed from raw regional measurements to regional age deviations and then to one whole-brain value.
 
-The central finding is specific: the regional gap consistently outperforms the scalar gap, but it exceeds hippocampal volume only for the sharper CN-versus-AD contrast. The results do not establish regional brain age as a replacement for established structural markers or as a clinical diagnostic system.
+The principal finding is that regional brain-age gaps consistently retain more Alzheimer's-related information than a scalar gap. Their advantage over bilateral hippocampal volume is narrower and specific to the sharper CN-versus-AD diagnostic contrast.
 
----
-
-## Objectives
+## Research Questions
 
 The analysis addresses five questions:
 
-1. Can FastSurfer-derived structural MRI features predict chronological age in held-out CN participants?
-2. Does a regional brain-age-gap vector retain more diagnostic and cognitive information than a scalar gap?
-3. Does brain-age information add value beyond chronological age, sex, and education?
-4. Does the regional representation outperform bilateral hippocampal volume or normalised grey-matter volume?
-5. Are the conclusions stable across reconstruction-QC thresholds and age-bias corrections?
+1. How accurately can FastSurfer-derived structural MRI features predict chronological age in held-out CN participants?
+2. Does a 171-region brain-age-gap vector retain more diagnostic and cognitive information than a scalar gap?
+3. How much value does each representation add beyond age, sex, and education?
+4. How do brain-age representations compare with hippocampal volume and normalised grey-matter volume?
+5. How stable are the conclusions across age-bias corrections and reconstruction-quality thresholds?
 
-## Key Findings
+---
 
-The primary result pattern is:
+## Findings
+
+### Summary
 
 * The regional gap exceeds the scalar gap across both diagnostic contrasts and all four cognitive outcomes.
-* The scalar gap does not outperform hippocampal volume on any evaluated outcome.
-* The regional gap exceeds hippocampal volume only on CN versus AD; its CN-versus-MCI+AD advantage remains within sampling error.
-* Regional and raw representations produce better descriptive calibration than the demographics baseline and scalar gap.
-* Bias-correction choice has negligible effect in this cohort.
-* The regional-versus-scalar conclusion persists across all four reconstruction-QC thresholds.
+* Regional-gap AUC reaches 0.766 for CN versus MCI+AD and 0.935 for CN versus AD.
+* The regional gap exceeds hippocampal volume on CN versus AD, with a paired AUC difference of +0.053 and 95% CI [+0.015, +0.094].
+* Raw regional features achieve the lowest Brier score and the strongest incremental R² for ADAS and FAQ.
+* Raw, linear, and non-linear age-bias corrections produce effectively identical gap distributions.
+* The regional-versus-scalar result persists across all four reconstruction-quality thresholds.
 
-### Cohort and Brain-Age Performance
+### Analytic Cohort
 
-The primary reconstruction-QC cohort contains 634 participants: 171 CN, 358 with mild cognitive impairment (MCI), and 105 with Alzheimer's disease (AD).
+The primary reconstruction-quality cohort contains 634 participants: 171 CN, 358 with mild cognitive impairment (MCI), and 105 with Alzheimer's disease (AD).
 
 | Diagnosis | N | Age, mean (SD) | Female, n (%) | Male, n (%) | Education, mean (SD) |
 |---|---:|---:|---:|---:|---:|
@@ -74,9 +66,21 @@ The primary reconstruction-QC cohort contains 634 participants: 171 CN, 358 with
 | MCI | 358 | 70.9 (7.5) | 170 (47.5%) | 188 (52.5%) | 16.2 (2.7) |
 | AD | 105 | 74.0 (7.9) | 50 (47.6%) | 55 (52.4%) | 15.8 (2.6) |
 
-The primary CN-only RidgeCV model achieved MAE 3.582 years and R² 0.459 on held-out CN participants. RidgeCV selected alpha 1,000 in every outer fold. The mean CN scalar gap was approximately +0.09 years, indicating negligible group-level offset in the reference population.
+MCI participants are younger on average than CN participants, while AD participants are only slightly older. This age pattern supports interpretation of the observed brain-age differences as deviations from a CN structural ageing trajectory rather than direct reflections of chronological-age imbalance.
 
-An exploratory fixed `Ridge(alpha=1.0)` model provides a deliberately under-regularised comparator. It achieved MAE 3.839 years and R² 0.364. This exploratory model is not used for the reported diagnostic or cognitive findings.
+### CN Brain-Age Performance
+
+The primary CN-only RidgeCV model achieves an out-of-fold mean absolute error of 3.582 years and R² of 0.459. RidgeCV selects alpha 1,000 in every outer fold. The mean CN scalar gap is approximately +0.09 years, indicating that the reference group is centred close to zero.
+
+![Out-of-fold predicted versus chronological age](Outputs/Figures/BrainAge/figure1_predicted_vs_actual_age.png)
+
+Figure 1 compares out-of-fold predicted brain age with chronological age for 171 CN participants. The diagonal represents perfect prediction. The concentration of observations around this line, together with MAE 3.58 years and R² 0.459, establishes the predictive performance of the CN reference model used to derive downstream brain-age gaps.
+
+### Brain-Age Gap Across Diagnosis
+
+![Brain-age gap distribution by diagnosis](Outputs/Figures/BrainAge/figure2_gap_distribution_by_diagnosis.png)
+
+Figure 2 shows the distribution of scalar brain-age gaps across CN, MCI, and AD participants. The distribution moves rightward from CN, centred near zero, through MCI to AD. This pattern is consistent with progressively older-appearing brain structure across the diagnostic spectrum, while the overlap between groups motivates evaluation of richer regional representations.
 
 ### Diagnostic Utility and Calibration
 
@@ -89,15 +93,17 @@ An exploratory fixed `Ridge(alpha=1.0)` model provides a deliberately under-regu
 | Hippocampal volume | 0.727 | 0.2119 | 0.881 |
 | Normalised grey matter | 0.632 | 0.2377 | 0.769 |
 
-On CN versus MCI+AD, the regional gap exceeded the scalar gap by +0.075 AUC units, with a paired 95% confidence interval of [+0.042, +0.109]. On CN versus AD, the difference was +0.093 [+0.055, +0.131]. Both intervals exclude zero.
+On CN versus MCI+AD, the regional gap exceeds the scalar gap by +0.075 AUC units, with a paired 95% confidence interval of [+0.042, +0.109]. On CN versus AD, the difference is +0.093 [+0.055, +0.131].
 
-The hippocampal comparison is narrower. On CN versus MCI+AD, the regional-minus-hippocampal difference was +0.040 [-0.003, +0.082], so the interval included zero. On CN versus AD, the regional gap exceeded hippocampal volume by +0.053 [+0.015, +0.094]. The evidence therefore supports a regional advantage over hippocampal volume for CN versus AD, not for the combined MCI+AD contrast.
+The regional-minus-hippocampal difference is +0.040 [-0.003, +0.082] for CN versus MCI+AD and +0.053 [+0.015, +0.094] for CN versus AD. The evidence therefore supports a regional advantage over hippocampal volume for the sharper CN-versus-AD contrast.
 
-Regional and raw representations also improved probability calibration. Their Brier scores were lower than those of the demographics baseline and scalar gap. Brier-score differences were not subjected to paired significance testing and remain descriptive.
+![Out-of-fold diagnostic calibration curves](Outputs/Figures/BrainAge/figure3_calibration_curves.png)
+
+Figure 3 compares predicted probabilities with observed positive-class proportions for CN versus MCI+AD. The regional gap and raw regional features lie closest to the ideal diagonal and produce the lowest Brier scores. These calibration results complement the AUC comparison by showing that preservation of regional detail improves probability reliability as well as ranking performance.
 
 ### Cognitive Utility
 
-The demographics-only baseline produced R² -0.012 for MMSE and -0.007 for CDR-SB. The table reports the out-of-fold R² gained by adding each representation. Complete-case sample sizes were 443 for MMSE, 442 for CDR-SB, 196 for ADAS, and 197 for FAQ.
+The table reports the out-of-fold R² gained by adding each representation to age, sex, and education. Complete-case sample sizes are 443 for MMSE, 442 for CDR-SB, 196 for ADAS, and 197 for FAQ.
 
 | Representation | MMSE ΔR² | CDR-SB ΔR² | ADAS ΔR² | FAQ ΔR² |
 |---|---:|---:|---:|---:|
@@ -107,208 +113,175 @@ The demographics-only baseline produced R² -0.012 for MMSE and -0.007 for CDR-S
 | Hippocampal volume | +0.249 | +0.272 | +0.194 | +0.155 |
 | Normalised grey matter | +0.136 | +0.131 | +0.081 | +0.040 |
 
-Paired tests showed that the regional gap exceeded the scalar gap for MMSE, CDR-SB, ADAS, and FAQ. The FAQ interval excluded zero by a narrow margin. The conclusion rests on the consistent cross-outcome pattern rather than on FAQ alone.
+The regional gap exceeds the scalar gap for MMSE, CDR-SB, ADAS, and FAQ in paired comparisons. Raw regional features lead on ADAS and FAQ, while the regional gap provides the strongest improvement for MMSE and CDR-SB. The 171-region representation therefore retains a substantial share of the raw feature matrix's information in a more compact age-deviation form.
 
-Raw regional features achieved the highest incremental R² for ADAS and FAQ, but they did not consistently outperform the regional gap across outcomes. The regional gap therefore retains a more compact 171-feature representation without claiming universal superiority over the complete raw feature matrix.
+### Bias-Correction and Reconstruction-QC Sensitivity
 
-### Bias-Correction and QC Sensitivity
-
-Raw, linear, and non-linear age-bias correction produced effectively identical gap distributions. The CN mean gap was 0.099 years in each variant. The MCI+AD mean gap was 3.127 years for the raw variant and 3.125 years for both corrected variants. The CN-trained gap was already close to unbiased, leaving little systematic age trend to remove.
+Raw, linear, and non-linear correction produce a CN mean gap of approximately 0.099 years. The MCI+AD mean gap is 3.127 years for the raw variant and approximately 3.125 years for both corrected variants. The close agreement reflects the near-zero age bias of the initial CN model.
 
 The complete pipeline was independently re-fitted at four `SurfaceHoles` thresholds:
 
-| Reconstruction-QC Rule | Regional Minus Scalar AUC, CN vs MCI+AD | Regional Minus Hippocampal AUC, CN vs AD |
+| Reconstruction-QC rule | Regional minus scalar AUC, CN vs MCI+AD | Regional minus hippocampal AUC, CN vs AD |
 |---|---:|---:|
 | No exclusion | +0.067 | +0.049 |
 | 97.5th percentile | +0.053 | +0.056 |
 | 95th percentile | +0.078 | +0.045 |
 | Median + 3 scaled MADs | +0.075 | +0.053 |
 
-The paired regional-minus-scalar interval excluded zero at every threshold. The regional-minus-hippocampal interval for CN versus AD also excluded zero at every threshold. On CN versus MCI+AD, every regional-minus-hippocampal interval included zero. The principal regional-versus-scalar conclusion is therefore QC-robust, while the hippocampal advantage remains specific to CN versus AD.
+The regional-minus-scalar interval excludes zero at every threshold. The regional-minus-hippocampal interval for CN versus AD also excludes zero throughout the sensitivity analysis. The same inferential pattern is therefore retained across progressively stricter reconstruction-quality criteria.
 
 ### Interpretation
 
-The scalar brain-age gap did not outperform hippocampal volume on any evaluated outcome. MCI participants were younger on average than CN participants, AD participants were only slightly older, and the demographics baseline produced near-chance primary diagnostic discrimination. The observed gap effects are therefore not explained by chronological age alone.
+The comparison identifies representation choice as a central determinant of brain-age utility. A scalar gap provides a concise summary of overall age deviation, while regional gaps preserve the anatomical distribution of that deviation. In this cohort, that preserved spatial structure carries diagnostic and cognitive information lost during scalar compression.
 
-Scalar compression discards anatomically heterogeneous disease signal. Regional brain-age gaps preserve spatial structure while retaining the interpretation of deviation from a CN ageing trajectory.
-
-This conclusion does not generalise to every brain-age implementation or dataset. It applies to this cross-sectional ADNI cohort, the specified FastSurfer feature set, the CN-trained models, and the documented out-of-fold evaluation design.
+The regional gap is best interpreted as a compact, anatomically structured representation rather than a universal replacement for raw morphometry or established structural markers. Its strongest comparative evidence is the consistent advantage over the scalar gap and the specific advantage over hippocampal volume for CN versus AD.
 
 ---
 
-## Example Outputs
+## Methodology
 
-The visualisation script writes exactly four PNG files to `Outputs/Figures/BrainAge/`. It does not generate PDF figures or place descriptive captions inside the images.
-
-### Table 1: Demographic Characteristics
-
-![Demographic characteristics](Outputs/Figures/BrainAge/table1_demographic_characteristics.png)
-
-### Figure 1: Predicted Versus Actual Age
-
-![Out-of-fold predicted versus chronological age](Outputs/Figures/BrainAge/figure1_predicted_vs_actual_age.png)
-
-### Figure 2: Brain-Age Gap by Diagnosis
-
-![Brain-age gap distribution by diagnosis](Outputs/Figures/BrainAge/figure2_gap_distribution_by_diagnosis.png)
-
-### Figure 3: Diagnostic Calibration
-
-![Out-of-fold diagnostic calibration curves](Outputs/Figures/BrainAge/figure3_calibration_curves.png)
-
----
-
-## Methodology Summary
-
-### Data Source and Cohort Construction
+### Data and Cohort Construction
 
 One baseline or initial 3 T T1-weighted MPRAGE scan is selected per participant. Each image is linked to the nearest eligible same-subject clinical examination within ±90 days. ADNI early-MCI and late-MCI labels are harmonised into the MCI class.
 
-FastSurfer-derived subcortical, cortical, white-matter, and global measurements are assembled with diagnosis, demographic variables, and cognitive outcomes. The modelling table contains 1,382 FastSurfer-derived fields before the three reconstruction-QC `SurfaceHoles` fields are removed, leaving 1,379 anatomical predictors.
+FastSurfer v2.4.2 produces subcortical, cortical, white-matter, and global measurements. The modelling table contains 1,382 FastSurfer-derived fields before the three reconstruction-quality `SurfaceHoles` fields are removed, leaving 1,379 anatomical predictors.
 
-### Reconstruction Quality Control
+### Reconstruction Quality
 
-RID 4377 is excluded because its FastSurfer parcellation contains partial missingness. The primary automated reconstruction-quality gate excludes whole-brain `SurfaceHoles` values above:
+RID 4377 is excluded following a partial FastSurfer processing failure. The primary automated quality gate excludes whole-brain `SurfaceHoles` values above:
 
 ```text
 median + 3 × 1.4826 × median absolute deviation
 ```
 
-The threshold is 49.13 in the supplied modelling dataset and excludes 54 of the remaining 688 participants. Exclusion rates were 6.0% for CN, 7.5% for MCI, and 11.8% for AD. This assesses FastSurfer surface reconstruction quality. It is not direct raw-image QC for motion or acquisition artefacts.
+The resulting threshold is 49.13 defects and excludes 54 of the remaining 688 participants. Exclusion rates are 6.0% for CN, 7.5% for MCI, and 11.8% for AD. `SurfaceHoles` provides a consistent automated measure of FastSurfer surface reconstruction quality.
 
-### Brain-Age Modelling
+### Brain-Age Representations
 
-Five-fold `GroupKFold` produces held-out CN predictions. Within each outer training fold, `StandardScaler` is fitted on CN training participants only and RidgeCV selects alpha from `0.1`, `1`, `10`, `100`, `1,000`, and `10,000`. MCI and AD predictions are averaged across the five CN-trained models.
+Five-fold `GroupKFold` produces held-out CN predictions. Within each outer training fold, `StandardScaler` is fitted on CN training participants and RidgeCV selects alpha from `0.1`, `1`, `10`, `100`, `1,000`, and `10,000`. MCI and AD predictions are averaged across the five CN-trained models.
 
-The scalar model uses all 1,379 anatomical predictors. The regional representation fits a separate age model to the measurements assigned to each of 171 anatomical regions.
+The scalar model uses all 1,379 anatomical predictors. The regional representation fits an independent age model to the measurements assigned to each of 171 anatomical regions. The raw representation supplies the 1,379 structural predictors directly to the downstream evaluation.
 
-### Downstream Evaluation
+### Diagnostic and Cognitive Evaluation
 
 Every representation is added to a demographics baseline containing age, sex, and education. Diagnosis uses out-of-fold L2 logistic regression and reports AUC and Brier score. Cognition uses out-of-fold RidgeCV and reports R² gain over demographics.
 
-Five-fold `StratifiedKFold` uses shuffling and random seed 42. Paired percentile-bootstrap intervals use `scipy.stats.bootstrap`, 9,999 subject-level resamples, and `random_state=0`.
+Five-fold `StratifiedKFold` uses shuffling and random seed 42. Paired percentile-bootstrap intervals use 9,999 subject-level resamples with `random_state=0`. Diagnostic targets are CN versus MCI+AD and CN versus AD; cognitive outcomes are MMSE, CDR-SB, ADAS, and FAQ.
 
-The diagnostic targets are CN versus MCI+AD and CN versus AD. Cognitive outcomes are MMSE, CDR-SB, ADAS, and FAQ. Each cognition analysis uses complete cases for that outcome.
+---
 
 ## Repository Structure
 
 ```text
 Data/
-├── Raw/                              # Restricted ADNI downloads; ignored by Git
-├── Interim/                          # Linked and selected local cohort tables
-├── Processed/Analysis/               # Modelling input and generated result CSVs
-└── README.md                         # Acquisition, layout, and governance instructions
+├── Raw/                              # Restricted ADNI downloads
+├── Interim/                          # Linked clinical and imaging tables
+├── Processed/Analysis/               # Modelling input and generated result tables
+└── README.md                         # Data layout, acquisition, and governance
 Outputs/
-└── Figures/BrainAge/                 # Exactly four generated PNG files
+└── Figures/BrainAge/                 # Generated research figures
 Source/
-├── DataPreparation/                  # Clinical and image linkage workflow
+├── DataPreparation/                  # Clinical and image linkage
 ├── FeatureExtraction/                # FastSurfer execution and feature assembly
 ├── Analysis/                         # Modelling-dataset construction
-├── Modelling/                        # Brain-age models, evaluation, and QC sensitivity
-├── Visualisation/                    # Table and figure generation
-└── Utilities/                        # Archive unpacking
+├── Modelling/                        # Brain-age models and sensitivity analyses
+├── Visualisation/                    # Result figure generation
+└── Utilities/                        # Archive preparation
 requirements.txt
 ```
 
-## Reproducibility Notes
+## Reproducing the Analysis
 
-### Deterministic Result Generation
-
-The workflow fixes every stochastic component used for downstream evaluation. Five-fold stratified models use random seed 42, and paired percentile-bootstrap intervals use 9,999 subject-level resamples with `random_state=0`.
-
-All modelling CSV writers use 17-significant-digit float serialisation. This prevents avoidable precision loss when generated results are saved and reloaded.
-### Data Governance
-
-ADNI data are restricted and are not distributed through this repository. Access requires approval through the [LONI Image and Data Archive](https://ida.loni.usc.edu/) and compliance with ADNI data-use agreements.
-
-Raw, interim, processed, and participant-level result data remain excluded from version control. The committed PNGs contain aggregate or de-identified analytical results.
-
-## Reproducing the Pipeline
-
-The scripts require Python 3.10 or later. Install dependencies from the repository root:
+Python 3.10 or later is required. Install the analysis dependencies from the repository root:
 
 ```powershell
 python -m pip install -r requirements.txt
 ```
 
-### 1. Prepare the Restricted ADNI Data
+### 1. Prepare ADNI Data
 
-Follow [`Data/README.md`](Data/README.md), then run:
+Follow [Data/README.md](Data/README.md), then run:
 
 ```powershell
 python Source\Utilities\UnpackRawData.py
 python Source\DataPreparation\PrepareInterimData.py
 ```
 
-### 2. Extract FastSurfer Features and Build the Modelling Dataset
+### 2. Extract FastSurfer Features
 
-Follow [`Source/FeatureExtraction/README.md`](Source/FeatureExtraction/README.md), then run:
+Follow [Source/FeatureExtraction/README.md](Source/FeatureExtraction/README.md), then run:
 
 ```powershell
+python Source\FeatureExtraction\PrepareFastSurferInputs.py
+python Source\FeatureExtraction\RunFastSurfer.py
 python Source\FeatureExtraction\BuildFastSurferRegionalFeatureTable.py
 python Source\Analysis\BuildFastSurferModellingDataset.py
 ```
 
-The required modelling input is:
+The resulting modelling input is:
 
 ```text
 Data/Processed/Analysis/FastSurferModellingDataset.csv
 ```
 
-### 3. Run the Primary Brain-Age Analysis
+### 3. Run Brain-Age Modelling
 
 ```powershell
 python Source\Modelling\RunBrainAgeModelling.py
 ```
 
-This writes exploratory fixed-alpha and bias-correction results, primary subject-level estimates, the regional-gap matrix, diagnostic and cognition results, out-of-fold predictions, calibration inputs, and paired comparisons to `Data/Processed/Analysis/BrainAgeResults/`.
+This stage writes subject-level estimates, regional-gap matrices, exploratory bias-correction results, diagnostic and cognitive model results, out-of-fold predictions, calibration inputs, and paired representation comparisons to `Data/Processed/Analysis/BrainAgeResults/`.
 
-### 4. Run QC-Threshold Sensitivity
+### 4. Run Reconstruction-QC Sensitivity
 
 ```powershell
 python Source\Modelling\RunQcSensitivityAnalysis.py
 ```
 
-This independently reloads the data and re-fits the complete model at all four QC thresholds.
+This stage re-fits the complete model under all four reconstruction-quality rules.
 
-### 5. Generate the Four PNG Outputs
+### 5. Generate Research Figures
 
 ```powershell
 python Source\Visualisation\GenerateBrainAgeFigures.py
 ```
 
-## Research Context
+The generated figures are written to `Outputs/Figures/BrainAge/`.
 
-This repository tests a representation question rather than a direct disease-classification claim. The comparison asks how much information is lost when heterogeneous regional ageing patterns are reduced to one whole-brain value.
+## Reproducibility
 
-The findings support regional brain-age modelling as a compact, interpretable alternative to a scalar gap. They do not show that the regional gap universally exceeds raw morphometric features, established structural biomarkers, or disease-specific models.
+Scaling, regularisation selection, brain-age estimation, bias correction, diagnostic modelling, and cognition modelling are fitted within the relevant training folds. All downstream estimates use subject-level out-of-fold predictions.
+
+Random seed 42 controls the stratified downstream folds. Paired bootstrap intervals use 9,999 resamples and `random_state=0`. Result CSVs use 17-significant-digit floating-point serialisation to preserve deterministic round trips.
+
+## Data Governance
+
+ADNI data access is administered through the [LONI Image and Data Archive](https://ida.loni.usc.edu/) under the ADNI data-use agreement. Raw images, clinical tables, processed participant data, and subject-level model results remain within the approved local research environment. The repository contains the source workflow and aggregate research figures.
+
+## Study Scope
+
+* The analysis is cross-sectional and uses one baseline or screening scan per participant.
+* `SurfaceHoles` measures reconstruction quality; direct raw-image motion and acquisition assessment remains an extension for future work.
+* The evidence is derived from an AD-enriched ADNI research cohort and requires external evaluation before population or clinical generalisation.
+* Representation dimensionality varies from one scalar gap to 171 regional gaps and 1,379 raw features.
+* ADAS and FAQ analyses use smaller complete-case subsets than MMSE and CDR-SB.
+* The current two-stage design creates label-free out-of-fold gap features before downstream evaluation; a fully nested single-stage implementation provides a further validation target.
 
 ## Future Work
 
-* Validate the regional-gap findings externally in cohorts such as OASIS and UK Biobank.
-* Model longitudinal regional-gap trajectories as markers of disease progression.
-* Investigate disease-aware fine-tuning that preserves regional interpretability.
-* Incorporate direct raw-image QC where original scans are available.
-
-## Limitations
-
-* The analysis is cross-sectional and uses one baseline or screening scan per participant.
-* `SurfaceHoles` is a reconstruction-quality proxy, not direct raw-image QC; retained motion or acquisition artefacts remain possible.
-* AD participants had a higher reconstruction-QC exclusion rate than CN or MCI participants.
-* ADNI is an AD-enriched research cohort and is not fully population-representative. The brain-age reference group is restricted to CN participants from this cohort, so external validation is required before generalisation or clinical use.
-* Representation dimensionality differs: one scalar gap, 171 regional gaps, and 1,379 raw features. Out-of-fold regularisation limits overfitting but does not equalise information content.
-* ADAS and FAQ are available for smaller complete-case subsets than MMSE and CDR-SB.
-* The two-stage design computes label-free gap features out of fold before downstream cross-validation. A fully nested single-stage pipeline would provide a stronger validation design.
-* These outputs support research interpretation and do not constitute a diagnostic system.
+* Evaluate the regional-gap findings in external cohorts such as OASIS and UK Biobank.
+* Model longitudinal regional-gap trajectories across disease progression.
+* Investigate disease-aware fine-tuning that retains regional interpretability.
+* Integrate direct raw-image quality assessment where original scans are available.
 
 ## Supporting Documentation
 
-* [Data acquisition, layout, and governance](Data/README.md)
+* [Data acquisition, structure, and governance](Data/README.md)
 * [FastSurfer feature extraction](Source/FeatureExtraction/README.md)
-* [Modelling commands and output contract](Source/Modelling/README.md)
-* [Visualisation outputs](Source/Visualisation/README.md)
-* [Generated output layout](Outputs/README.md)
+* [Modelling commands and result tables](Source/Modelling/README.md)
+* [Visualisation workflow](Source/Visualisation/README.md)
+* [Generated output structure](Outputs/README.md)
 
 ## Licence
 
-This project is released under the MIT Licence. See [`LICENSE`](LICENSE).
+This project is released under the MIT Licence. See [LICENSE](LICENSE).

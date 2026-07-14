@@ -467,3 +467,51 @@ Data/Raw/*
 ```
 
 The repository documents how to obtain and organise the data, while the restricted ADNI files remain local to approved users.
+
+---
+
+## Derived analysis data
+
+The executable modelling workflow uses the following local, version-ignored layout:
+
+```text
+Data/
+  Interim/
+    Clinical/
+    Imaging/
+    Linked/
+  Processed/
+    Analysis/
+      FastSurferRegionalFeatures.csv
+      FastSurferModellingDataset.csv
+      BrainAgeResults/
+        BrainAgeSubjectResults.csv
+        RegionalBrainAgeGaps.csv
+        RegionalGapSummary.csv
+        BrainAgeModelSummary.csv
+        CohortSummary.csv
+        QCSummary.csv
+        DiagnosisModelResults.csv
+        DiagnosisOutOfFoldPredictions.csv
+        CognitionModelResults.csv
+        CognitionOutOfFoldPredictions.csv
+        HeadToHeadModelResults.csv
+        QcSensitivityResults.csv
+        QcSensitivityHeadToHead.csv
+        FixedAlphaModelResults.csv
+        FixedAlphaPredictions.csv
+        BiasCorrectionResults.csv
+        BiasCorrectedGaps.csv
+        RepresentationSummary.csv
+        FixedAlphaRegionalGaps.csv
+```
+
+`Interim/` contains linked cohort tables produced by the data-preparation scripts. `Processed/Analysis/` contains the FastSurfer feature table, modelling input, and generated brain-age result tables. These directories remain excluded from version control because they contain restricted or participant-level ADNI-derived data.
+
+Run the modelling and visualisation stages from the repository root:
+
+```powershell
+python Source\Modelling\RunBrainAgeModelling.py
+python Source\Modelling\RunQcSensitivityAnalysis.py
+python Source\Visualisation\GenerateBrainAgeFigures.py
+```
